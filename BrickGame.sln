@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrickGame", "BrickGame\BrickGame.csproj", "{CFE5461E-5285-4501-ADC5-85BF261B59FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFE5461E-5285-4501-ADC5-85BF261B59FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFE5461E-5285-4501-ADC5-85BF261B59FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFE5461E-5285-4501-ADC5-85BF261B59FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFE5461E-5285-4501-ADC5-85BF261B59FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19C66F87-F896-48E6-8AFB-3262650AD595}
+	EndGlobalSection
+EndGlobal
