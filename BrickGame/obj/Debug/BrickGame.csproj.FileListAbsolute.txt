@@ -8,3 +8,13 @@ C:\Users\ShpriZZ\source\repos\BrickGame\BrickGame\obj\Debug\BrickGame.csproj.Gen
 C:\Users\ShpriZZ\source\repos\BrickGame\BrickGame\obj\Debug\BrickGame.csproj.CoreCompileInputs.cache
 C:\Users\ShpriZZ\source\repos\BrickGame\BrickGame\obj\Debug\BrickGame.exe
 C:\Users\ShpriZZ\source\repos\BrickGame\BrickGame\obj\Debug\BrickGame.pdb
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\bin\Debug\BrickGame.exe.config
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\bin\Debug\BrickGame.exe
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\bin\Debug\BrickGame.pdb
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.csprojAssemblyReference.cache
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.MainForm.resources
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.Properties.Resources.resources
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.csproj.GenerateResource.cache
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.csproj.CoreCompileInputs.cache
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.exe
+C:\Users\ShpriZZ\Documents\GitHub\BrickGame\BrickGame\obj\Debug\BrickGame.pdb
