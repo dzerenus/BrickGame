@@ -36,38 +36,48 @@ namespace BrickGame
         /// </summary>
         public void ThreadProc()
         {
-            Figure fg = new Figure(1);
+            Figure fg = new Figure(0);
 
             while (true)
             {
 
                 for (int i = 0; i < fg.APosition.Length; i++)
                 {
-                    var fgY = fg.APosition[i].y;
-                    var fgX = fg.APosition[i].x;
+                    // Ссылочные переменные на координаты фигуры.
+                    ref int fY = ref fg.APosition[i].y;
+                    ref int fX = ref fg.APosition[i].x;
 
-                    if (fgY > 0)
+                    if (fY >= 0)
                     {
-                        if (field.Cells[fgX, fgY - 1].IsClosed) return;
+                        if (fY > 0)
+                            if (field.Cells[fX, fY - 1].IsClosed) return;
 
 
-                        if (fgY >= field.SizeY)
+                        if (fY >= field.SizeY)
                         {
                             for (int j = 0; j < fg.APosition.Length; j++)
-                                field.Cells[fg.APosition[j].x, fg.APosition[j].y - 1].IsClosed = true;
+                                field.Cells[fX, fY - 1].IsClosed = true;
                             return;
                         }
 
 
-                        if (field.Cells[fg.APosition[i].x, fgY].IsClosed)
+                        if (field.Cells[fX, fY].IsClosed)
                         {
                             for (int j = 0; j < fg.APosition.Length; j++)
-                                field.Cells[fg.APosition[j].x, fg.APosition[j].y - 1].IsClosed = true;
+                                field.Cells[fX, fY - 1].IsClosed = true;
                             return;
                         }
 
-                        FillCell(fg.APosition[i].x, fgY);
-                        ClearCell(fg.APosition[i].x, fgY - 1);
+                        field.Cells[fX, fY].Draw(graph, Brushes.Orange, borderPen);
+
+                        if (fY > 1)
+                        {
+                            if (!field.Cells[fX, fY - 2].IsFill)
+                                field.Cells[fX, fY - 1].Fill(graph, backColor);
+                        }
+                        else if (fY > 0)
+                            field.Cells[fX, fY - 1].Fill(graph, backColor);
+
                     }
 
                     fg.APosition[i].y += 1;
@@ -76,36 +86,7 @@ namespace BrickGame
 
                 Thread.Sleep(200);
             }
-
         }
 
-        // Метод отрисовки и залития какой-то клетки.
-        // Входные параметры определяют номер клетки по X и Y.
-        private void FillCell(int x, int y)
-        {
-            // Координаты левого верхнего угла клетки.
-            var rx = field.Cells[x, y].Start.X;
-            var ry = field.Cells[x, y].Start.Y;
-
-            // Сама клетка - прямоугольник.
-            var cell = new Rectangle(rx, ry, 20, 20);
-
-            // Отрисовка и залитие.
-            graph.FillRectangle(Brushes.Aquamarine, cell);
-            graph.DrawRectangle(borderPen, cell);
-        }
-
-        private void ClearCell(int x, int y)
-        {
-            // Координаты левого верхнего угла клетки.
-            var rx = field.Cells[x, y].Start.X;
-            var ry = field.Cells[x, y].Start.Y;
-
-            // Сама клетка - прямоугольник.
-            var cell = new Rectangle(rx, ry, 21, 21);
-
-            // Отрисовка и залитие.
-            graph.FillRectangle(backColor, cell);
-        }
     }
 }

@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cell.cs" />
+    <Compile Include="ControlThread.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="Figure.cs" />
     <Compile Include="MainForm.cs">
