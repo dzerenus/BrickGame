@@ -19,40 +19,62 @@ namespace BrickGame
         // Кисть для отрисовки фона игрового поля.
         private Brush backColor = new SolidBrush(Color.FromArgb(255, 230, 230, 230));
 
-        // Класс-поток основной игры.
-        // Необходим, чтобы сделать интерфейс независимым от остальной игры.
+        /// <summary>
+        /// Инициализация класса нового потока и передача необходимых параметров в него.
+        /// Поток используется для отрисовки фигур и процесса игры, чтобы не заставлять интерфейс подвисать.
+        /// </summary>
+        /// <param name="f">Класс игрового поля.</param>
+        /// <param name="g">Поле для рисования фигур.</param>
         public PlayThread(Field f, Graphics g)
         {
             field = f;
             graph = g;
         }
 
+        /// <summary>
+        /// Процедура непосредственного запуска метода игры.
+        /// </summary>
         public void ThreadProc()
         {
-            var figY = 0;
+            Figure fg = new Figure(1);
 
-            while (figY < field.SizeY)
+            while (true)
             {
-                if (figY > 0)
+
+                for (int i = 0; i < fg.APosition.Length; i++)
                 {
-                    
-                    if (field.Cells[3, figY - 1].IsClosed) 
-                        break;
+                    var fgY = fg.APosition[i].y;
+                    var fgX = fg.APosition[i].x;
 
-                    if (figY + 1 == field.SizeY)
-                        field.Cells[3, figY].IsClosed = true;
+                    if (fgY > 0)
+                    {
+                        if (field.Cells[fgX, fgY - 1].IsClosed) return;
 
-                    if (figY + 1 < field.SizeY )
-                        if (field.Cells[3, figY + 1].IsClosed) 
-                            field.Cells[3, figY].IsClosed = true;
 
-                    ClearCell(3, figY - 1);
+                        if (fgY >= field.SizeY)
+                        {
+                            for (int j = 0; j < fg.APosition.Length; j++)
+                                field.Cells[fg.APosition[j].x, fg.APosition[j].y - 1].IsClosed = true;
+                            return;
+                        }
+
+
+                        if (field.Cells[fg.APosition[i].x, fgY].IsClosed)
+                        {
+                            for (int j = 0; j < fg.APosition.Length; j++)
+                                field.Cells[fg.APosition[j].x, fg.APosition[j].y - 1].IsClosed = true;
+                            return;
+                        }
+
+                        FillCell(fg.APosition[i].x, fgY);
+                        ClearCell(fg.APosition[i].x, fgY - 1);
+                    }
+
+                    fg.APosition[i].y += 1;
+
                 }
 
-                FillCell(3, figY);
-                figY++;
-
-                Thread.Sleep(50);
+                Thread.Sleep(200);
             }
 
         }
