@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace BrickGame
 {
@@ -42,82 +43,144 @@ namespace BrickGame
 
             figure = new Figure(0);
 
-            while (true)
+            while (!figure.IsClosed)
             {
-                for (int i = 0; i < figure.APosition.Length; i++)
-                {
-                    // Ссылочные переменные на координаты фигуры.
-                    ref int fY = ref figure.APosition[i].y;
-                    ref int fX = ref figure.APosition[i].x;
-
-                    if (fY >= 0)
-                    {
-                        if (fY > 0)
-                            if (field.Cells[fX, fY - 1].IsClosed) return;
-
-
-                        if (fY >= field.SizeY)
-                        {
-                            for (int j = 0; j < figure.APosition.Length; j++)
-                                field.Cells[fX, fY - 1].IsClosed = true;
-                            return;
-                        }
-
-
-                        if (field.Cells[fX, fY].IsClosed)
-                        {
-                            for (int j = 0; j < figure.APosition.Length; j++)
-                                field.Cells[fX, fY - 1].IsClosed = true;
-                            return;
-                        }
-
-                        field.Cells[fX, fY].Draw(graph, Brushes.Orange, borderPen);
-
-                        if (fY > 1)
-                        {
-                            if (!field.Cells[fX, fY - 2].IsFill)
-                                field.Cells[fX, fY - 1].Fill(graph, backColor);
-                        }
-                        else if (fY > 0)
-                            field.Cells[fX, fY - 1].Fill(graph, backColor);
-
-                    }
-
-                    fY += 1;
-
-                }
+                FallFigure();
 
                 Thread.Sleep(200);
             }
         }
 
         /// <summary>
-        /// Метод обработки нажатия на клавиши.
+        /// Процедура обработки нажатия клавиш.
         /// </summary>
         /// <param name="key">Имя нажатой клавиши.</param>
         public void KeyPressed(string key)
         {
+            if (key == "d" || key == "в") MoveFigure(1);   // Переместить вправо.
+            if (key == "a" || key == "ф") MoveFigure(-1);  // Переместить влево.
+            if (key == "w" || key == "ц") return;          // Повернуть.
+            if (key == "s" || key == "ы") return;          // Быстро опустить.
+            if (key == " ") return;                        // Бросить.
+        }
+
+        /// <summary>
+        /// Процедура смещения фигуры по оси X.
+        /// </summary>
+        /// <param name="dX">Смещение.</param>
+        private void MoveFigure(int dX) {
+
+            // Проверяем доступность смещения каждой клетки фигуры.
             for (int i = 0; i < figure.APosition.Length; i++)
             {
-                figure.APosition[i].x += 1;
+                // Получаем координаты клетки фигуры.
+                var y = figure.APosition[i].y;
+                var x = figure.APosition[i].x;
+                var nX = x + dX; // Координата по X с учётом смещения.
+
+                // Проверяем, чтобы X не выходил за левую и правую границы.
+                // Проверяем, чтобы X не залезал на уже установленные фигуры.
+                if (figure.IsClosed) return;
+                if (nX < 0 || nX >= field.SizeX) return;
+                if (y >= 0 && field.Cells[nX, y].IsClosed) return;
+            }
+
+            // Смещение каждой клетки фигуры по X.
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                // Ссылочные переменные клетки.
+                ref int rY = ref figure.APosition[i].y;
+                ref int rX = ref figure.APosition[i].x;
+
+                // Смещаем клетку.
+                rX += dX;
+
+                // Код ниже отрисовывет фигуру с защитой от перехвата другим процессом.
+                var isOK = false;
+
+                while (!isOK)
+                {
+                    try
+                    {
+                        if (rY >= 0)
+                        {
+                            // Отрисовываем фигуру.
+                            field.Cells[rX - dX, rY].Fill(graph, backColor);
+                            field.Cells[rX, rY].Draw(graph, Brushes.Orange, borderPen);
+                        }
+
+                        isOK = true;
+                    }
+
+                    catch (InvalidOperationException) { Thread.Sleep(10); }
+                }
             }
         }
 
         private void FallFigure()
         {
+            // Цикл проверки доступности ячейки ниже.
+            // В этом цикле мы только проверяем, ничего не изменяя.
+            // Проверяем доступность каждой отдельной клеточки.
             for (int i = 0; i < figure.APosition.Length; i++)
             {
-                ref int fY = ref figure.APosition[i].y;
-                ref int fX = ref figure.APosition[i].x;
+                // Координаты каждой клетки фигуры.
+                var x = figure.APosition[i].x;
+                var y = figure.APosition[i].y;
 
-                // Если ячейка фигуры находится за пределами экрана, не отрисовывем её.
-                if (fY < 0)
+                // Если клетка фигуры за границой экрана, уходим в следующую итерацию.
+                if (y < 0) continue;
+
+                // Если ниже фигуры граница игрового поля или уже уставновленная фигура.
+                // Блокируем фигуру и выходим из цикла.
+                if (y + 1 >= field.SizeY || field.Cells[x, y + 1].IsClosed)
                 {
-                    fY += 1;
+                    Thread.Sleep(300);
+                    figure.IsClosed = true;
                     break;
                 }
+            }
 
-                
+            // Цикл опускания фигуры на одну клетку вниз.
+            // Опускаем каждую отдельную клеточку.
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                // Ссылочные переменные на координаты клетки фигуры.
+                ref int rX = ref figure.APosition[i].x;
+                ref int rY = ref figure.APosition[i].y;
+
+                // Если клетка за экраном, опускаем её на одну клетку вниз.
+                if (rY < -1)
+                {
+                    rY++;
+                    continue;
+                }
+
+                // Если фигура установлена, блокируем каждую клетку.
+                if (figure.IsClosed) field.Cells[rX, rY].IsClosed = true;
+
+                else
+                {
+                    // Опускаем фигуру на одну клетку.
+                    rY++;
+
+                    // Код ниже отрисовывает фигуру с защитой от перехвата другим процессом.
+                    var isOK = false;
+
+                    while (!isOK)
+                    {
+                        try
+                        {
+                            // Отрисовываем фигуру.
+                            if (rY > 0) field.Cells[rX, rY - 1].Fill(graph, backColor);
+                            field.Cells[rX, rY].Draw(graph, Brushes.Orange, borderPen);
+
+                            isOK = true;
+                        }
+
+                        catch (InvalidOperationException) { Thread.Sleep(10); }
+                    }
+                }
             }
         }
     }
