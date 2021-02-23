@@ -15,21 +15,30 @@ namespace BrickGame
     {
         private Graphics drawField;
         private Field field;
+        private PlayThread playThread;
 
         public MainForm()
         {
             InitializeComponent();
+
             drawField = pbField.CreateGraphics();
             field = new Field(14, 28);
+
+            playThread = new PlayThread(field, drawField);
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            var pt = new PlayThread(field, drawField);
-
-            var t = new Thread(new ThreadStart(pt.ThreadProc));
+            var t = new Thread(new ThreadStart(playThread.ThreadProc));
             t.Start();
         }
 
+        private void MainForm_KeyDown(object sender, KeyPressEventArgs e)
+        {
+            if (playThread == null) return;
+            if (!playThread.IsActive) return;
+
+            playThread.KeyPressed("");
+        }
     }
 }

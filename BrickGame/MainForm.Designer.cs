@@ -61,6 +61,7 @@ namespace BrickGame
             this.btnStart.Text = "Старт";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            this.btnStart.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             // 
             // btnPause
             // 
@@ -71,6 +72,7 @@ namespace BrickGame
             this.btnPause.TabIndex = 2;
             this.btnPause.Text = "Пауза";
             this.btnPause.UseVisualStyleBackColor = true;
+            this.btnPause.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             // 
             // btnSettings
             // 
@@ -80,6 +82,7 @@ namespace BrickGame
             this.btnSettings.TabIndex = 3;
             this.btnSettings.Text = "Настройки";
             this.btnSettings.UseVisualStyleBackColor = true;
+            this.btnSettings.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             // 
             // PBNextFigure
             // 
@@ -139,6 +142,7 @@ namespace BrickGame
             this.MinimumSize = new System.Drawing.Size(468, 653);
             this.Name = "MainForm";
             this.Text = "BrickGame by ShpriZZ";
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pbField)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PBNextFigure)).EndInit();
             this.ResumeLayout(false);

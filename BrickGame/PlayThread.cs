@@ -10,13 +10,15 @@ namespace BrickGame
 {
     class PlayThread
     {
+        public bool IsActive = false;
+
+        // Приватные переменные для доступа из разных потоков.
         private Field field;
         private Graphics graph;
+        private Figure figure;
 
-        // Ручка для отрисовки контура предметов.
+        // Ручка для отрисовки контура предметов и кисть для отрисовки фона.
         private Pen borderPen = new Pen(Brushes.Black);
-
-        // Кисть для отрисовки фона игрового поля.
         private Brush backColor = new SolidBrush(Color.FromArgb(255, 230, 230, 230));
 
         /// <summary>
@@ -36,16 +38,17 @@ namespace BrickGame
         /// </summary>
         public void ThreadProc()
         {
-            Figure fg = new Figure(0);
+            IsActive = true;
+
+            figure = new Figure(0);
 
             while (true)
             {
-
-                for (int i = 0; i < fg.APosition.Length; i++)
+                for (int i = 0; i < figure.APosition.Length; i++)
                 {
                     // Ссылочные переменные на координаты фигуры.
-                    ref int fY = ref fg.APosition[i].y;
-                    ref int fX = ref fg.APosition[i].x;
+                    ref int fY = ref figure.APosition[i].y;
+                    ref int fX = ref figure.APosition[i].x;
 
                     if (fY >= 0)
                     {
@@ -55,7 +58,7 @@ namespace BrickGame
 
                         if (fY >= field.SizeY)
                         {
-                            for (int j = 0; j < fg.APosition.Length; j++)
+                            for (int j = 0; j < figure.APosition.Length; j++)
                                 field.Cells[fX, fY - 1].IsClosed = true;
                             return;
                         }
@@ -63,7 +66,7 @@ namespace BrickGame
 
                         if (field.Cells[fX, fY].IsClosed)
                         {
-                            for (int j = 0; j < fg.APosition.Length; j++)
+                            for (int j = 0; j < figure.APosition.Length; j++)
                                 field.Cells[fX, fY - 1].IsClosed = true;
                             return;
                         }
@@ -80,7 +83,7 @@ namespace BrickGame
 
                     }
 
-                    fg.APosition[i].y += 1;
+                    fY += 1;
 
                 }
 
@@ -88,5 +91,34 @@ namespace BrickGame
             }
         }
 
+        /// <summary>
+        /// Метод обработки нажатия на клавиши.
+        /// </summary>
+        /// <param name="key">Имя нажатой клавиши.</param>
+        public void KeyPressed(string key)
+        {
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                figure.APosition[i].x += 1;
+            }
+        }
+
+        private void FallFigure()
+        {
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                ref int fY = ref figure.APosition[i].y;
+                ref int fX = ref figure.APosition[i].x;
+
+                // Если ячейка фигуры находится за пределами экрана, не отрисовывем её.
+                if (fY < 0)
+                {
+                    fY += 1;
+                    break;
+                }
+
+                
+            }
+        }
     }
 }
