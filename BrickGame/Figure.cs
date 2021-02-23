@@ -9,6 +9,11 @@ namespace BrickGame
     class Figure
     {
         /// <summary>
+        /// Заблокирована ли фигура.
+        /// </summary>
+        public bool IsClosed = false;
+
+        /// <summary>
         /// Массив относительных координат клеток фигуры. В массиве 4 элемента, т. к. в тетрисе все фигуры состоят из 4 клеток.
         /// </summary>
         public (int x, int y)[] RPosition { get { return rPosition; } }
