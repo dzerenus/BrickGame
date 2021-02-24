@@ -18,6 +18,8 @@ namespace BrickGame
         private Graphics graph;
         private Figure figure;
 
+        private int time = 300;
+
         // Ручка для отрисовки контура предметов и кисть для отрисовки фона.
         private Pen borderPen = new Pen(Brushes.Black);
         private Brush backColor = new SolidBrush(Color.FromArgb(255, 230, 230, 230));
@@ -39,16 +41,78 @@ namespace BrickGame
         /// </summary>
         public void ThreadProc()
         {
+            Random rnd = new Random();
             IsActive = true;
 
-            figure = new Figure(0);
-
-            while (!figure.IsClosed)
+            while (true)
             {
-                FallFigure();
+                var type = rnd.Next(0, 6);
+                figure = new Figure(type);
 
-                Thread.Sleep(200);
+                while (!figure.IsClosed)
+                {
+                    FallFigure();
+
+                    Thread.Sleep(time);
+                }
+                time = 300;
+
+                var lines = FieldAnalyze();
+                if (lines.Count > 0)
+                {
+                    DeleteLines(lines);
+                }
             }
+        }
+
+        private void DeleteLines(List<int> linesNum)
+        {
+            for (int i = 0; i < linesNum.Count; i++)
+            {
+                var y = linesNum[i] + i;
+
+                for (int x = 0; x < field.SizeX; x++)
+                {
+                    field.Cells[x, y].Fill(graph, backColor);
+                    field.Cells[x, y].IsClosed = false;
+                }
+
+                for (int u = y - 1; u > 0; u--)
+                {
+                    for (int x = 0; x < field.SizeX; x++)
+                    {
+                        if (field.Cells[x, u].IsClosed)
+                        {
+                            field.Cells[x, u].IsClosed = false;
+                            field.Cells[x, u].Fill(graph, backColor);
+                            field.Cells[x, u+1].Draw(graph, Brushes.Red, borderPen);
+                            field.Cells[x, u+1].IsClosed = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<int> FieldAnalyze()
+        {
+            List<int> numLines = new List<int>();
+
+            for (int y = field.SizeY - 1; y >= 0; y--)
+            {
+                var cellCounter = 0;
+
+                for (int x = field.SizeX - 1; x >= 0; x--)
+                {
+                    if (field.Cells[x, y].IsClosed) 
+                        cellCounter++;
+                    else break;
+                }
+
+                if (cellCounter == field.SizeX) 
+                    numLines.Add(y);
+            }
+
+            return numLines;
         }
 
         /// <summary>
@@ -59,9 +123,97 @@ namespace BrickGame
         {
             if (key == "d" || key == "в") MoveFigure(1);   // Переместить вправо.
             if (key == "a" || key == "ф") MoveFigure(-1);  // Переместить влево.
-            if (key == "w" || key == "ц") return;          // Повернуть.
-            if (key == "s" || key == "ы") return;          // Быстро опустить.
+            if (key == "w" || key == "ц") TurnFigure();    // Повернуть.
+            if (key == "s" || key == "ы")
+            {
+                time = 1;
+            }          // Быстро опустить.
             if (key == " ") return;                        // Бросить.
+        }
+
+        private void TurnFigure()
+        {
+            // Если фигура - квадрат, то выходим.
+            if (figure.Type == 2) return;
+
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                var ax = figure.APosition[i].x;
+                var ay = figure.APosition[i].y;
+
+                var rx = figure.RPosition[i].x;
+                var ry = figure.RPosition[i].y;
+
+                ax = ax - rx;
+                ay = ay - ry;
+
+                var temp = rx;
+                rx = ry;
+                ry = temp;
+
+                if (figure.Type == 3 || figure.Type == 4)
+                {
+                    if (figure.Stage % 2 == 0) rx *= -1;
+                    else ry *= -1;
+                }
+
+                else if (figure.Type == 5 || figure.Type == 6) ry *= -1;
+
+                else
+                    if (figure.Stage % 2 == 0)
+                    {
+                        rx *= -1;
+                        ry *= -1;
+                    }
+
+                ax = ax + rx;
+                ay = ay + ry;
+
+                if (ax < 0 || ax >= field.SizeX) return;
+                if (ay >= field.SizeY) return;
+                if (field.Cells[ax, ay].IsClosed) return;
+            }
+
+            figure.Erase(graph, field, backColor);
+
+            for (int i = 0; i < figure.APosition.Length; i++)
+            {
+                ref int rAX = ref figure.APosition[i].x;
+                ref int rAY = ref figure.APosition[i].y;
+
+                ref int rRX = ref figure.RPosition[i].x;
+                ref int rRY = ref figure.RPosition[i].y;
+
+                rAX = rAX - rRX;
+                rAY = rAY - rRY;
+
+                var temp = rRX;
+                rRX = rRY;
+                rRY = temp;
+
+                if (figure.Type == 3 || figure.Type == 4)
+                {
+                    if (figure.Stage % 2 == 0) rRX *= -1;
+                    else rRY *= -1;
+                }
+
+                else if (figure.Type == 5 || figure.Type == 6) rRY *= -1;
+
+                else
+                    if (figure.Stage % 2 == 0)
+                    {
+                        rRX *= -1;
+                        rRY *= -1;
+                    }                
+
+                rAX = rAX + rRX;
+                rAY = rAY + rRY;
+            }
+
+            figure.Draw(graph, field, Brushes.Red, borderPen);
+
+            figure.Stage++;
+            if (figure.Stage == 4) figure.Stage = 0;
         }
 
         /// <summary>
@@ -85,6 +237,8 @@ namespace BrickGame
                 if (y >= 0 && field.Cells[nX, y].IsClosed) return;
             }
 
+            figure.Erase(graph, field, backColor);
+
             // Смещение каждой клетки фигуры по X.
             for (int i = 0; i < figure.APosition.Length; i++)
             {
@@ -92,29 +246,10 @@ namespace BrickGame
                 ref int rY = ref figure.APosition[i].y;
                 ref int rX = ref figure.APosition[i].x;
 
-                // Смещаем клетку.
-                rX += dX;
-
-                // Код ниже отрисовывет фигуру с защитой от перехвата другим процессом.
-                var isOK = false;
-
-                while (!isOK)
-                {
-                    try
-                    {
-                        if (rY >= 0)
-                        {
-                            // Отрисовываем фигуру.
-                            field.Cells[rX - dX, rY].Fill(graph, backColor);
-                            field.Cells[rX, rY].Draw(graph, Brushes.Orange, borderPen);
-                        }
-
-                        isOK = true;
-                    }
-
-                    catch (InvalidOperationException) { Thread.Sleep(10); }
-                }
+                rX += dX; // Смещаем клетку.
             }
+
+            figure.Draw(graph, field, Brushes.Red, borderPen);
         }
 
         private void FallFigure()
@@ -135,11 +270,13 @@ namespace BrickGame
                 // Блокируем фигуру и выходим из цикла.
                 if (y + 1 >= field.SizeY || field.Cells[x, y + 1].IsClosed)
                 {
-                    Thread.Sleep(300);
+                    Thread.Sleep(50);
                     figure.IsClosed = true;
                     break;
                 }
             }
+
+            figure.Erase(graph, field, backColor);
 
             // Цикл опускания фигуры на одну клетку вниз.
             // Опускаем каждую отдельную клеточку.
@@ -157,31 +294,14 @@ namespace BrickGame
                 }
 
                 // Если фигура установлена, блокируем каждую клетку.
-                if (figure.IsClosed) field.Cells[rX, rY].IsClosed = true;
-
-                else
+                if (figure.IsClosed)
                 {
-                    // Опускаем фигуру на одну клетку.
-                    rY++;
-
-                    // Код ниже отрисовывает фигуру с защитой от перехвата другим процессом.
-                    var isOK = false;
-
-                    while (!isOK)
-                    {
-                        try
-                        {
-                            // Отрисовываем фигуру.
-                            if (rY > 0) field.Cells[rX, rY - 1].Fill(graph, backColor);
-                            field.Cells[rX, rY].Draw(graph, Brushes.Orange, borderPen);
-
-                            isOK = true;
-                        }
-
-                        catch (InvalidOperationException) { Thread.Sleep(10); }
-                    }
+                    field.Cells[rX, rY].IsClosed = true;
                 }
+                else rY++; // Опускаем фигуру на одну клетку.
             }
+
+            figure.Draw(graph, field, Brushes.Red, borderPen);
         }
     }
 }

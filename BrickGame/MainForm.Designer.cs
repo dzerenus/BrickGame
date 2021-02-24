@@ -31,14 +31,8 @@ namespace BrickGame
         {
             this.pbField = new System.Windows.Forms.PictureBox();
             this.btnStart = new System.Windows.Forms.Button();
-            this.btnPause = new System.Windows.Forms.Button();
-            this.btnSettings = new System.Windows.Forms.Button();
-            this.PBNextFigure = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.lPoints = new System.Windows.Forms.Label();
-            this.lLines = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbField)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PBNextFigure)).BeginInit();
             this.SuspendLayout();
             // 
             // pbField
@@ -54,97 +48,42 @@ namespace BrickGame
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(314, 512);
+            this.btnStart.Location = new System.Drawing.Point(13, 609);
             this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(126, 23);
+            this.btnStart.Size = new System.Drawing.Size(295, 23);
             this.btnStart.TabIndex = 1;
             this.btnStart.Text = "Старт";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             this.btnStart.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             // 
-            // btnPause
-            // 
-            this.btnPause.Enabled = false;
-            this.btnPause.Location = new System.Drawing.Point(314, 541);
-            this.btnPause.Name = "btnPause";
-            this.btnPause.Size = new System.Drawing.Size(126, 23);
-            this.btnPause.TabIndex = 2;
-            this.btnPause.Text = "Пауза";
-            this.btnPause.UseVisualStyleBackColor = true;
-            this.btnPause.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
-            // 
-            // btnSettings
-            // 
-            this.btnSettings.Location = new System.Drawing.Point(314, 571);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(126, 23);
-            this.btnSettings.TabIndex = 3;
-            this.btnSettings.Text = "Настройки";
-            this.btnSettings.UseVisualStyleBackColor = true;
-            this.btnSettings.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
-            // 
-            // PBNextFigure
-            // 
-            this.PBNextFigure.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.PBNextFigure.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.PBNextFigure.Location = new System.Drawing.Point(315, 13);
-            this.PBNextFigure.Name = "PBNextFigure";
-            this.PBNextFigure.Size = new System.Drawing.Size(126, 126);
-            this.PBNextFigure.TabIndex = 4;
-            this.PBNextFigure.TabStop = false;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label1.ForeColor = System.Drawing.SystemColors.ButtonShadow;
-            this.label1.Location = new System.Drawing.Point(365, 597);
+            this.label1.Location = new System.Drawing.Point(233, 635);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(75, 12);
             this.label1.TabIndex = 5;
             this.label1.Text = "by ShpriZZ, 2021";
             // 
-            // lPoints
-            // 
-            this.lPoints.AutoSize = true;
-            this.lPoints.Location = new System.Drawing.Point(315, 146);
-            this.lPoints.Name = "lPoints";
-            this.lPoints.Size = new System.Drawing.Size(44, 13);
-            this.lPoints.TabIndex = 6;
-            this.lPoints.Text = "Очки: 0";
-            // 
-            // lLines
-            // 
-            this.lLines.AutoSize = true;
-            this.lLines.Location = new System.Drawing.Point(315, 162);
-            this.lLines.Name = "lLines";
-            this.lLines.Size = new System.Drawing.Size(51, 13);
-            this.lLines.TabIndex = 7;
-            this.lLines.Text = "Линии: 0";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 618);
-            this.Controls.Add(this.lLines);
-            this.Controls.Add(this.lPoints);
+            this.ClientSize = new System.Drawing.Size(322, 650);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.PBNextFigure);
-            this.Controls.Add(this.btnSettings);
-            this.Controls.Add(this.btnPause);
             this.Controls.Add(this.btnStart);
             this.Controls.Add(this.pbField);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(468, 653);
+            this.MaximumSize = new System.Drawing.Size(338, 685);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(468, 653);
+            this.MinimumSize = new System.Drawing.Size(338, 685);
             this.Name = "MainForm";
             this.Text = "BrickGame by ShpriZZ";
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pbField)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PBNextFigure)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -154,12 +93,7 @@ namespace BrickGame
 
         private System.Windows.Forms.PictureBox pbField;
         private System.Windows.Forms.Button btnStart;
-        private System.Windows.Forms.Button btnPause;
-        private System.Windows.Forms.Button btnSettings;
-        private System.Windows.Forms.PictureBox PBNextFigure;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lPoints;
-        private System.Windows.Forms.Label lLines;
     }
 }
 

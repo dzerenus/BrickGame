@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.Threading;
 
 namespace BrickGame
 {
@@ -14,6 +12,16 @@ namespace BrickGame
         public bool IsClosed = false;
 
         /// <summary>
+        /// Тип фигуры.
+        /// </summary>
+        public int Type;
+
+        /// <summary>
+        /// Нужно ли домножать на -1 при повороте.
+        /// </summary>
+        public int Stage = 0;
+
+        /// <summary>
         /// Массив относительных координат клеток фигуры. В массиве 4 элемента, т. к. в тетрисе все фигуры состоят из 4 клеток.
         /// </summary>
         public (int x, int y)[] RPosition { get { return rPosition; } }
@@ -22,10 +30,10 @@ namespace BrickGame
         /// <summary>
         /// Абсполютная позиция фигуры на поле относительно ключевой клетки фигуры, относительные координаты которой равны нулю.
         /// </summary>
-        public (int x, int y)[] APosition 
-        { 
-            get { return aPosition; } 
-            set { aPosition = value; } 
+        public (int x, int y)[] APosition
+        {
+            get { return aPosition; }
+            set { aPosition = value; }
         }
         private (int x, int y)[] aPosition = new (int x, int y)[4];
 
@@ -34,8 +42,10 @@ namespace BrickGame
         /// </summary>
         /// <param name="type">Тип фигуры. От 0 до 6.</param>
         /// <param name="xSpawnPosition">Координата появления фигуры на поле по X.</param>
-        public Figure(int type, int xSpawnPosition=6)
+        public Figure(int type, int xSpawnPosition = 6)
         {
+            Type = type;
+
             switch (type)
             {
                 // Если фигура - палка.
@@ -44,12 +54,6 @@ namespace BrickGame
                     rPosition[1] = (0, 0);
                     rPosition[2] = (0, -1);
                     rPosition[3] = (0, -2);
-
-                    aPosition[0] = (xSpawnPosition, rPosition[0].y);
-                    aPosition[1] = (xSpawnPosition, rPosition[1].y);
-                    aPosition[2] = (xSpawnPosition, rPosition[2].y);
-                    aPosition[3] = (xSpawnPosition, rPosition[3].y);
-
                     break;
 
                 // Если фигура - трезубец.
@@ -58,30 +62,103 @@ namespace BrickGame
                     rPosition[1] = (0, -1);
                     rPosition[2] = (-1, 0);
                     rPosition[3] = (1, 0);
-
-                    aPosition[0] = (xSpawnPosition + rPosition[0].x, rPosition[0].y);
-                    aPosition[1] = (xSpawnPosition + rPosition[1].x, rPosition[1].y);
-                    aPosition[2] = (xSpawnPosition + rPosition[2].x, rPosition[2].y);
-                    aPosition[3] = (xSpawnPosition + rPosition[3].x, rPosition[3].y);
                     break;
 
                 // Если фигура - квадрат.
-                case 2: break;
+                case 2:
+                    rPosition[0] = (0, 0);
+                    rPosition[1] = (0, -1);
+                    rPosition[2] = (1, -1);
+                    rPosition[3] = (1, 0);
+                    break;
 
                 // Если фигура - Z.
-                case 3: break;
+                case 3:
+                    rPosition[0] = (0, 0);
+                    rPosition[1] = (0, -1);
+                    rPosition[2] = (1, -1);
+                    rPosition[3] = (-1, 0);
+                    break;
 
                 // Если фигура - обратная Z.
-                case 4: break;
+                case 4:
+                    rPosition[0] = (0, 0);
+                    rPosition[1] = (0, -1);
+                    rPosition[2] = (-1, -1);
+                    rPosition[3] = (1, 0);
+                    break;
 
                 // Если фигура - L.
-                case 5: break;
+                case 5:
+                    rPosition[0] = (0, -1);
+                    rPosition[1] = (0, 0);
+                    rPosition[2] = (0, 1);
+                    rPosition[3] = (1, 1);
+                    break;
 
                 // Если фигура - обратная L.
-                case 6: break;
-                
+                case 6:
+                    rPosition[0] = (0, -1);
+                    rPosition[1] = (0, 0);
+                    rPosition[2] = (0, 1);
+                    rPosition[3] = (-1, 1);
+                    break;
+
                 // Если тип фигуры задан ошибочно.
-                default: throw new Exception("Неизвестный тип фигуры");
+                default: throw new Exception("Неизвестный тип фигуры"); 
+            }
+
+            aPosition[0] = (xSpawnPosition + rPosition[0].x, rPosition[0].y);
+            aPosition[1] = (xSpawnPosition + rPosition[1].x, rPosition[1].y);
+            aPosition[2] = (xSpawnPosition + rPosition[2].x, rPosition[2].y);
+            aPosition[3] = (xSpawnPosition + rPosition[3].x, rPosition[3].y);
+        }
+
+        /// <summary>
+        /// Стереть фигуру с поля.
+        /// </summary>
+        /// <param name="graph">Поле для рисования.</param>
+        /// <param name="field">Поле из клеток.</param>
+        /// <param name="BackColor">Фоновой цвет.</param>
+        public void Erase(Graphics graph, Field field, Brush BackColor)
+        {
+            bool isOk = false;
+
+            while (!isOk)
+            {
+                try
+                {
+                    foreach (var pos in aPosition)
+                    {
+                        if (pos.y < 0) continue;
+                        field.Cells[pos.x, pos.y].Fill(graph, BackColor);
+                    }
+
+                    isOk = true;
+                }
+
+                catch (InvalidOperationException) { Thread.Sleep(20); }
+            }
+        }
+
+        public void Draw(Graphics graph, Field field, Brush BackColor, Pen pen)
+        {
+            bool isOk = false;
+
+            while (!isOk)
+            {
+                try
+                {
+                    foreach (var pos in aPosition)
+                    { 
+                        if (pos.y < 0) continue; 
+                        field.Cells[pos.x, pos.y].Draw(graph, BackColor, pen);
+                    }
+
+                    isOk = true;
+                }
+
+                catch (InvalidOperationException) { Thread.Sleep(20); }
             }
         }
     }
