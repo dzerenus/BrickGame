@@ -58,15 +58,15 @@ namespace BrickGame
         /// </summary>
         /// <param name="clr">Кисть фонового цвета.</param>
         /// <param name="graph">Поле для рисования.</param>
-        public void Update(Graphics graph, Brush clr)
+        public void Update()
         {
-            for (int i = 0; i < cells.Length; i++)
+            for (int x = 0; x < sizeX; x++)
             {
-                if (cells[i / 10, i % 10].IsClosed) break;
-                if (cells[i / 10, i % 10].IsFill) break;
-
-                else
-                    cells[i / 10, i % 10].Fill();
+                for (int y = 0; y < sizeY; y++)
+                {
+                        cells[x, y].Fill();
+                }
+                
             }
         }
 

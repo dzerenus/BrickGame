@@ -30,8 +30,8 @@ namespace BrickGame
         }
         private (int x, int y)[] aPosition = new (int x, int y)[4];
 
-        public Brush ActiveColor { get; set; }    // Цвет фигуры в полёте.
-        public Brush DeactiveColor { get; set; }  // Цвет фигуры при установке.
+        private Brush activeColor;    // Цвет фигуры в полёте.
+        private Brush deactiveColor;  // Цвет фигуры при установке.
 
         /// <summary>
         /// Класс, использующийся, для создания и отрисовки фигур в момент их падения на поле.
@@ -41,8 +41,8 @@ namespace BrickGame
         public Figure(int ftype, Brush aColor, Brush dColor, int xSpawnPosition = 6)
         {
             type = ftype;
-            ActiveColor = aColor;
-            DeactiveColor = dColor;
+            activeColor = aColor;
+            deactiveColor = dColor;
 
             switch (type)
             {
@@ -103,7 +103,7 @@ namespace BrickGame
                     break;
 
                 // Если тип фигуры задан ошибочно.
-                default: throw new Exception("Неизвестный тип фигуры"); 
+                default: throw new Exception("Неизвестный тип фигуры");
             }
 
             aPosition[0] = (xSpawnPosition + rPosition[0].x, rPosition[0].y);
@@ -152,8 +152,8 @@ namespace BrickGame
                 try
                 {
                     foreach (var pos in aPosition)
-                    { 
-                        if (pos.y < 0) continue; 
+                    {
+                        if (pos.y < 0) continue;
                         field.Cells[pos.x, pos.y].Draw(cellBrush);
                     }
 
@@ -181,10 +181,15 @@ namespace BrickGame
                 rPosition[i] = check.newRPosition[i];
             }
 
-            this.Draw(field, ActiveColor); // Рисуем фигуру.
+            this.Draw(field, activeColor); // Рисуем фигуру.
             isMinus = !isMinus;            // Меняем знак минуса.
         }
 
+        /// <summary>
+        /// Определяем возможность поворота фигур. Если поворот возможен, готовим все координаты для этого.
+        /// </summary>
+        /// <param name="field">Поле для отрисовки.</param>
+        /// <returns>Кортеж. Возможность поворота и два массива координат.</returns>
         private (bool result, (int x, int y)[] newAPosition, (int x, int y)[] newRPosition) CanTurn(Field field)
         {
             // Возвращаемое значение по умолчанию.
@@ -214,10 +219,19 @@ namespace BrickGame
 
                 if (type == 5 || type == 6) ry *= -1;
 
-                else
+                else if (type == 3 || type == 4)
                 {
                     if (!isMinus) rx *= -1;
                     else ry *= -1;
+                }
+
+                else
+                {
+                    if (!isMinus)
+                    {
+                        rx *= -1;
+                        ry *= -1;
+                    }
                 }
 
                 ax = ax + rx;
@@ -232,6 +246,101 @@ namespace BrickGame
             }
 
             answer.result = true;
+            return answer;
+        }
+
+        public void Fall(Field field)
+        {
+            var check = CanFall(field);
+
+            if (!check.result)
+            {
+                this.IsClosed = true;
+
+                foreach (var pos in aPosition)
+                    field.Cells[pos.x, pos.y].IsClosed = true;
+
+                this.Erase(field);
+                this.Draw(field, deactiveColor);
+                return;
+            }
+
+            this.Erase(field);
+            for (int i = 0; i < aPosition.Length; i++)
+                aPosition[i] = check.newAPosition[i];
+            this.Draw(field, activeColor);
+        }
+
+        private (bool result, (int x, int y)[] newAPosition) CanFall(Field field)
+        {
+            (bool res, (int x, int y)[] nAP) answer;
+            answer.res = true;
+            answer.nAP = new (int x, int y)[4];
+
+            for (int i = 0; i < aPosition.Length; i++)
+            {
+                // Координаты каждой клетки фигуры.
+                var x = aPosition[i].x;
+                var y = aPosition[i].y;
+
+                // Если клетка фигуры за границой экрана, уходим в следующую итерацию.
+                if (y < 0)
+                {
+                    answer.nAP[i] = (x, y + 1);
+                    continue;
+                }
+
+                // Если ниже фигуры граница игрового поля или уже уставновленная фигура.
+                // Блокируем фигуру и выходим из цикла.
+                if (y + 1 >= field.SizeY || field.Cells[x, y + 1].IsClosed)
+                {
+                    answer.res = false;
+                    break;
+                }
+                else answer.nAP[i] = (x, y + 1);
+            }
+            return answer;
+        }
+
+        /// <summary>
+        /// Процедура смещения фигуры по оси X.
+        /// </summary>
+        /// <param name="dX">Смещение.</param>
+        public void Move(Field field, int dX)
+        {
+            var check = CanMove(field, dX);
+
+            if (!check.result) return;
+
+            this.Erase(field);
+            for (int i = 0; i < aPosition.Length; i++)
+                aPosition[i] = check.newAPosition[i];
+            this.Draw(field, activeColor);
+        }
+
+        private (bool result, (int x, int y)[] newAPosition) CanMove(Field field, int dX)
+        {
+            (bool res, (int x, int y)[] nAP) answer;
+            answer.res = false;
+            answer.nAP = new (int x, int y)[4];
+
+            for (int i = 0; i < aPosition.Length; i++)
+            {
+                // Получаем координаты клетки фигуры.
+                var y = aPosition[i].y;
+                var x = aPosition[i].x;
+                var nX = x + dX; // Координата по X с учётом смещения.
+
+                // Проверяем, чтобы X не выходил за левую и правую границы.
+                // Проверяем, чтобы X не залезал на уже установленные фигуры.
+                if (IsClosed) return answer;
+                if (nX < 0 || nX >= field.SizeX) return answer;
+                if (y >= 0 && field.Cells[nX, y].IsClosed) return answer;
+
+                answer.nAP[i] = (nX, y);
+            }
+
+            answer.res = true;
             return answer;
         }
     }
