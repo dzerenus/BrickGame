@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Collections.Generic;
 
 namespace BrickGame
 {
@@ -23,16 +24,6 @@ namespace BrickGame
         private int sizeY;
 
         /// <summary>
-        /// Фоновой цвет поля.
-        /// </summary>
-        public Color BackgroundColor 
-        { 
-            get { return backColor; } 
-            set { backColor = value; } 
-        }
-        private Color backColor;
-
-        /// <summary>
         /// Поле для рисования предметов.
         /// </summary>
         private Graphics graph;
@@ -42,9 +33,14 @@ namespace BrickGame
         /// </summary>
         /// <param name="sX">Ширина поля.</param>
         /// <param name="sY">Высота поля.</param>
-        /// <param name="bColor">Фоновой цвет игрового поля.</param>
-        public Field(int sX, int sY, Color bColor)
+        /// <param name="backBrush">Фоновой цвет игрового поля.</param>
+        public Field(int sX, int sY, Brush backBrush, Graphics grph)
         {
+            // Создаём ручку для рисования границ.
+            Pen brdPen = new Pen(Brushes.Black);
+
+            graph = grph;
+
             sizeX = sX;
             sizeY = sY;
 
@@ -54,7 +50,7 @@ namespace BrickGame
             // Заполняем ссылки на клетки экземплярами.
             for (int i = 0; i < sX; i++)
                 for (int j = 0; j < sY; j++)
-                    cells[i, j] = new Cell(i, j);
+                    cells[i, j] = new Cell(i, j, brdPen, backBrush, grph);
         }
 
         /// <summary>
@@ -70,7 +66,68 @@ namespace BrickGame
                 if (cells[i / 10, i % 10].IsFill) break;
 
                 else
-                    cells[i / 10, i % 10].Fill(graph, clr);
+                    cells[i / 10, i % 10].Fill();
+            }
+        }
+
+        /// <summary>
+        /// Функция, анализирующая поле на количество заполненных линий.
+        /// </summary>
+        /// <returns>Список номеров строк заполненных линий.</returns>
+        public List<int> LinesAnalize()
+        {
+            List<int> numLines = new List<int>();
+
+            for (int y = sizeY - 1; y >= 0; y--)
+            {
+                // Счётчик закрытых ячеек в линии.
+                var cellCounter = 0;
+
+                for (int x = sizeX - 1; x >= 0; x--)
+                {
+                    if (cells[x, y].IsClosed) cellCounter++;
+                    else break;
+                }
+
+                // Если число закрытых ячеек равно ширине линии, отмечаем линию к удалению.
+                if (cellCounter == sizeX) numLines.Add(y);
+            }
+
+            return numLines;
+        }
+
+        /// <summary>
+        /// Процедура удаления линий с поля. Убирает необходимые линии и смещает линии выше вниз.
+        /// </summary>
+        /// <param name="lines">Список номеров лиинй к удалению.</param>
+        public void RemoveLines(List<int> lines)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var y = lines[i] + i;
+
+                // Цикл стирания линий.
+                for (int x = 0; x < sizeX; x++)
+                {
+                    cells[x, y].Fill();
+                    cells[x, y].IsClosed = false;
+                }
+
+                // Цикл смещения остальных линий ниже.
+                for (int u = y - 1; u > 0; u--)
+                {
+                    for (int x = 0; x < sizeX; x++)
+                    {
+                        if (cells[x, u].IsClosed)
+                        {
+                            cells[x, u + 1].Draw(cells[x, u].CellColor);
+                            cells[x, u + 1].IsClosed = true;
+
+                            cells[x, u].IsClosed = false;
+                            cells[x, u].Fill();
+                        }
+                    }
+                }
             }
         }
     }

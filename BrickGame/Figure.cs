@@ -11,16 +11,8 @@ namespace BrickGame
         /// </summary>
         public bool IsClosed = false;
 
-        /// <summary>
-        /// Тип фигуры.
-        /// </summary>
-        public int Type { get { return fType; } }
-        private int fType;
-
-        /// <summary>
-        /// Стадия поворота фигуры..
-        /// </summary>
-        public int Stage = 0;
+        private int type;              // Тип фигуры.
+        private bool isMinus = false;  // Способ поворота фигуры.
 
         /// <summary>
         /// Массив относительных координат клеток фигуры. В массиве 4 элемента, т. к. в тетрисе все фигуры состоят из 4 клеток.
@@ -38,17 +30,19 @@ namespace BrickGame
         }
         private (int x, int y)[] aPosition = new (int x, int y)[4];
 
-        private Brush activeColor;    // Цвет фигуры в полёте.
-        private Brush deactiveColor;  // Цвет фигуры при установке.
+        public Brush ActiveColor { get; set; }    // Цвет фигуры в полёте.
+        public Brush DeactiveColor { get; set; }  // Цвет фигуры при установке.
 
         /// <summary>
         /// Класс, использующийся, для создания и отрисовки фигур в момент их падения на поле.
         /// </summary>
-        /// <param name="type">Тип фигуры. От 0 до 6.</param>
+        /// <param name="ftype">Тип фигуры. От 0 до 6.</param>
         /// <param name="xSpawnPosition">Координата появления фигуры на поле по X.</param>
-        public Figure(int type, int xSpawnPosition = 6)
+        public Figure(int ftype, Brush aColor, Brush dColor, int xSpawnPosition = 6)
         {
-            fType = type;
+            type = ftype;
+            ActiveColor = aColor;
+            DeactiveColor = dColor;
 
             switch (type)
             {
@@ -124,7 +118,7 @@ namespace BrickGame
         /// <param name="graph">Поле для рисования.</param>
         /// <param name="field">Поле из клеток.</param>
         /// <param name="BackColor">Фоновой цвет.</param>
-        public void Erase(Graphics graph, Field field, Brush BackColor)
+        public void Erase(Field field)
         {
             bool isOk = false;
 
@@ -135,24 +129,21 @@ namespace BrickGame
                     foreach (var pos in aPosition)
                     {
                         if (pos.y < 0) continue;
-                        field.Cells[pos.x, pos.y].Fill(graph, BackColor);
+                        field.Cells[pos.x, pos.y].Fill();
                     }
 
                     isOk = true;
                 }
 
-                catch (InvalidOperationException) { Thread.Sleep(20); }
+                catch (InvalidOperationException) { Thread.Sleep(15); }
             }
         }
 
         /// <summary>
         /// Процедура отрисовки фигуры на игровом поле.
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="field"></param>
-        /// <param name="BackColor"></param>
-        /// <param name="pen"></param>
-        public void Draw(Graphics graph, Field field, Brush BackColor, Pen pen)
+        /// <param name="field">Поле для рисования.</param>
+        public void Draw(Field field, Brush cellBrush)
         {
             bool isOk = false;
 
@@ -163,14 +154,85 @@ namespace BrickGame
                     foreach (var pos in aPosition)
                     { 
                         if (pos.y < 0) continue; 
-                        field.Cells[pos.x, pos.y].Draw(graph, BackColor, pen);
+                        field.Cells[pos.x, pos.y].Draw(cellBrush);
                     }
 
                     isOk = true;
                 }
 
-                catch (InvalidOperationException) { Thread.Sleep(20); }
+                catch (InvalidOperationException) { Thread.Sleep(10); }
             }
+        }
+
+        /// <summary>
+        /// ППроцедура поворота фигуры.
+        /// </summary>
+        /// <param name="field">Поле отрисовки.</param>
+        public void Turn(Field field)
+        {
+            var check = CanTurn(field);
+            if (!check.result) return;
+
+            this.Erase(field); // Стираем фигуру с поля.
+
+            for (int i = 0; i < aPosition.Length; i++)
+            {
+                aPosition[i] = check.newAPosition[i];
+                rPosition[i] = check.newRPosition[i];
+            }
+
+            this.Draw(field, ActiveColor); // Рисуем фигуру.
+            isMinus = !isMinus;            // Меняем знак минуса.
+        }
+
+        private (bool result, (int x, int y)[] newAPosition, (int x, int y)[] newRPosition) CanTurn(Field field)
+        {
+            // Возвращаемое значение по умолчанию.
+            (bool result, (int x, int y)[] nAP, (int x, int y)[] nRP) answer;
+            answer.result = false;
+            answer.nAP = new (int x, int y)[4];
+            answer.nRP = new (int x, int y)[4];
+
+            // Если фигура - квадрат, то выходим.
+            if (type == 2) return answer;
+
+            // Цикл проверки фигуры на возможность поворота.
+            for (int i = 0; i < aPosition.Length; i++)
+            {
+                var ax = aPosition[i].x;
+                var ay = aPosition[i].y;
+
+                var rx = rPosition[i].x;
+                var ry = rPosition[i].y;
+
+                ax = ax - rx;
+                ay = ay - ry;
+
+                var temp = rx;
+                rx = ry;
+                ry = temp;
+
+                if (type == 5 || type == 6) ry *= -1;
+
+                else
+                {
+                    if (!isMinus) rx *= -1;
+                    else ry *= -1;
+                }
+
+                ax = ax + rx;
+                ay = ay + ry;
+
+                if (ax < 0 || ax >= field.SizeX) return answer;
+                if (ay >= field.SizeY) return answer;
+                if (field.Cells[ax, ay].IsClosed) return answer;
+
+                answer.nRP[i] = (rx, ry);
+                answer.nAP[i] = (ax, ay);
+            }
+
+            answer.result = true;
+            return answer;
         }
     }
 }

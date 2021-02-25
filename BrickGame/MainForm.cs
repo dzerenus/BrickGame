@@ -7,17 +7,15 @@ namespace BrickGame
 {
     public partial class MainForm : Form
     {
-        private Graphics drawField;
-        private Field field;
         private PlayThread playThread;
 
         public MainForm()
         {
             InitializeComponent();
 
-            drawField = pbField.CreateGraphics();
-            var bColor = pbField.BackColor;
-            playThread = new PlayThread(drawField, bColor);
+            Graphics drawField = pbField.CreateGraphics();
+            var bBrush = new SolidBrush(pbField.BackColor);
+            playThread = new PlayThread(drawField, bBrush);
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -28,6 +26,7 @@ namespace BrickGame
 
         private void MainForm_KeyDown(object sender, KeyPressEventArgs e)
         {
+            // Проверка: происходит ли игра в потоке.
             if (playThread == null) return;
             if (!playThread.IsActive) return;
 
