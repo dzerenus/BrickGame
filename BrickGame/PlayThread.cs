@@ -30,9 +30,9 @@ namespace BrickGame
         /// </summary>
         /// <param name="f">Класс игрового поля.</param>
         /// <param name="g">Поле для рисования фигур.</param>
-        public PlayThread(Field f, Graphics g)
+        public PlayThread(Graphics g, Color backColor)
         {
-            field = f;
+            field = new Field(14, 28, backColor);
             graph = g;
         }
 

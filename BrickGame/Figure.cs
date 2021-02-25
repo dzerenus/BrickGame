@@ -14,10 +14,11 @@ namespace BrickGame
         /// <summary>
         /// Тип фигуры.
         /// </summary>
-        public int Type;
+        public int Type { get { return fType; } }
+        private int fType;
 
         /// <summary>
-        /// Нужно ли домножать на -1 при повороте.
+        /// Стадия поворота фигуры..
         /// </summary>
         public int Stage = 0;
 
@@ -37,6 +38,9 @@ namespace BrickGame
         }
         private (int x, int y)[] aPosition = new (int x, int y)[4];
 
+        private Brush activeColor;    // Цвет фигуры в полёте.
+        private Brush deactiveColor;  // Цвет фигуры при установке.
+
         /// <summary>
         /// Класс, использующийся, для создания и отрисовки фигур в момент их падения на поле.
         /// </summary>
@@ -44,7 +48,7 @@ namespace BrickGame
         /// <param name="xSpawnPosition">Координата появления фигуры на поле по X.</param>
         public Figure(int type, int xSpawnPosition = 6)
         {
-            Type = type;
+            fType = type;
 
             switch (type)
             {
@@ -115,7 +119,7 @@ namespace BrickGame
         }
 
         /// <summary>
-        /// Стереть фигуру с поля.
+        /// Процедура стирания фигуры с поля игры.
         /// </summary>
         /// <param name="graph">Поле для рисования.</param>
         /// <param name="field">Поле из клеток.</param>
@@ -141,6 +145,13 @@ namespace BrickGame
             }
         }
 
+        /// <summary>
+        /// Процедура отрисовки фигуры на игровом поле.
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <param name="field"></param>
+        /// <param name="BackColor"></param>
+        /// <param name="pen"></param>
         public void Draw(Graphics graph, Field field, Brush BackColor, Pen pen)
         {
             bool isOk = false;

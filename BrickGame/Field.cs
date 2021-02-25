@@ -4,24 +4,46 @@ namespace BrickGame
 {
     class Field
     {   
-        // Все клетки поля.
+        /// <summary>
+        /// Двумерный массив клеток игрового поля.
+        /// </summary>
         public Cell[,] Cells { get { return cells; } }
         private Cell[,] cells;
 
-        // Ширина игрового поля.
+        /// <summary>
+        /// Ширина игрового поля.
+        /// </summary>
         public int SizeX { get { return sizeX; } }
         private int sizeX;
 
-        // Ширина игрового поля.
+        /// <summary>
+        /// Высота игрового поля.
+        /// </summary>
         public int SizeY { get { return sizeY; } }
         private int sizeY;
+
+        /// <summary>
+        /// Фоновой цвет поля.
+        /// </summary>
+        public Color BackgroundColor 
+        { 
+            get { return backColor; } 
+            set { backColor = value; } 
+        }
+        private Color backColor;
+
+        /// <summary>
+        /// Поле для рисования предметов.
+        /// </summary>
+        private Graphics graph;
 
         /// <summary>
         /// Класс игрового поля Тетриса.
         /// </summary>
         /// <param name="sX">Ширина поля.</param>
         /// <param name="sY">Высота поля.</param>
-        public Field(int sX, int sY)
+        /// <param name="bColor">Фоновой цвет игрового поля.</param>
+        public Field(int sX, int sY, Color bColor)
         {
             sizeX = sX;
             sizeY = sY;

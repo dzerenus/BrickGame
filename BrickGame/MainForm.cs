@@ -16,9 +16,8 @@ namespace BrickGame
             InitializeComponent();
 
             drawField = pbField.CreateGraphics();
-            field = new Field(14, 28);
-
-            playThread = new PlayThread(field, drawField);
+            var bColor = pbField.BackColor;
+            playThread = new PlayThread(drawField, bColor);
         }
 
         private void btnStart_Click(object sender, EventArgs e)
