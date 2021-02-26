@@ -68,8 +68,8 @@ namespace BrickGame
             // Отрисовка и залитие.
             graph.FillRectangle(brush, cell);
             graph.DrawRectangle(borderPen, cell);
-            graph.DrawLine(borderPen, start.x + 4, start.y + 4, start.x + 16, start.y + 4);
-            graph.DrawLine(borderPen, start.x + 16, start.y + 4, start.x + 16, start.y + 16);
+            graph.DrawLine(borderPen, start.x + 2, start.y + 2, start.x + 18, start.y + 2);
+            graph.DrawLine(borderPen, start.x + 18, start.y + 2, start.x + 18, start.y + 18);
         }
 
         /// <summary>
